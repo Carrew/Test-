@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Student Results – Tyneceploh Educational Foundation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      text-align: center;
+    }
+    h2 {
+      color: #333;
+    }
+    #results {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-top: 20px;
+      text-align: left;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #6c63ff;
+      color: white;
+    }
+    #loading {
+      margin-top: 30px;
+      font-style: italic;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h2>Your Results</h2>
+  <div id="loading">Loading results, please wait...</div>
+  <div id="results" style="display:none;"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const studentID = params.get('studentID');
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbz3-cZZM_Zl23gfNJFczdOHL_ywDz0Rxi38ao4O82GU1_edzNtQpJF3M5W4eAU_KR9s/exec';
+
+    if (!studentID) {
+      document.getElementById('loading').innerText = "No student ID provided.";
+    } else {
+      fetch(`${scriptURL}?getResultsFor=${encodeURIComponent(studentID)}`)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('loading').style.display = 'none';
+
+          if (data.status === "success") {
+            let resultsHTML = `<h3>Student ID: ${studentID}</h3><table><tr><th>Subject</th><th>Score</th></tr>`;
+
+            data.results.forEach(item => {
+              resultsHTML += `<tr><td>${item.subject}</td><td>${item.score}</td></tr>`;
+            });
+
+            resultsHTML += "</table>";
+            document.getElementById('results').innerHTML = resultsHTML;
+            document.getElementById('results').style.display = 'block';
+          } else {
+            document.getElementById('loading').innerText = "Results not found or not approved yet.";
+          }
+        })
+        .catch(err => {
+          document.getElementById('loading').innerText = "Error fetching results.";
+          console.error(err);
+        });
+    }
+  </script>
+</body>
+</html>
