@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tyneceploh Educational Foundation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #6b4d3b;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    main {
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: 20px auto;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #6b4d3b;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #563a28;
+    }
+    #loginMessage {
+      margin-top: 15px;
+      color: red;
+      min-height: 20px;
+      font-weight: bold;
+      text-align: center;
+    }
+    footer {
+      text-align: center;
+      padding: 10px;
+      background: #ddd;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Tyneceploh Educational Foundation</h1>
+    <p>Welcome to the student result portal</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Student Login</h2>
+      <input type="text" id="studentID" placeholder="Enter Student ID">
+      <input type="password" id="pin" placeholder="Enter PIN">
+      <button onclick="studentLogin()">Login</button>
+      <p id="loginMessage"></p>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Tyneceploh Educational Foundation
+  </footer>
+
+  <script>
+    function studentLogin() {
+      const id = document.getElementById('studentID').value.trim();
+      const pin = document.getElementById('pin').value.trim();
+      const messageEl = document.getElementById('loginMessage');
+
+      if (!id || !pin) {
+        messageEl.style.color = 'red';
+        messageEl.innerText = "Please enter both Student ID and PIN.";
+        return;
+      }
+
+      messageEl.style.color = 'black';
+      messageEl.innerText = "Checking credentials...";
+
+      const url = 'https://script.google.com/macros/s/AKfycbz3-cZZM_Zl23gfNJFczdOHL_ywDz0Rxi38ao4O82GU1_edzNtQpJF3M5W4eAU_KR9s/exec?studentID=' + encodeURIComponent(id) + '&pin=' + encodeURIComponent(pin);
+
+      fetch(url)
+        .then(res => res.text())
+        .then(data => {
+          if (data === "success") {
+            messageEl.style.color = 'green';
+            messageEl.innerText = "Login successful! Redirecting...";
+            localStorage.setItem('studentID', id);
+            setTimeout(() => {
+              location.href = "student_dashboard.html";
+            }, 1500);
+          } else {
+            messageEl.style.color = 'red';
+            messageEl.innerText = "Invalid Student ID or PIN.";
+          }
+        })
+        .catch(err => {
+          messageEl.style.color = 'red';
+          messageEl.innerText = "Network error. Please try again.";
+          console.error(err);
+        });
+    }
+  </script>
+
+</body>
+</html>
