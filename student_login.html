@@ -69,8 +69,10 @@
         const text = await response.text();
 
         if (text === "success") {
-          resultBox.innerHTML = `<span style="color:green;">Login successful! You can now check your results.</span>`;
-          // Redirect or show results here as needed
+          resultBox.innerHTML = `<span style="color:green;">Login successful! Redirecting...</span>`;
+          setTimeout(() => {
+            window.location.href = 'student_results.html?studentID=' + encodeURIComponent(studentID);
+          }, 2000);
         } else {
           resultBox.innerHTML = `<span style="color:red;">Invalid Student ID or PIN.</span>`;
         }
