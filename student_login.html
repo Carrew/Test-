@@ -1,94 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Student Login – Tyneceploh Educational Foundation</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Login - Tyneceploh Educational Foundation</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
-      padding: 30px;
+      background-color: #f4f4f4;
       text-align: center;
+      padding: 50px;
     }
-
-    h2 {
-      color: #333;
+    form {
+      background: white;
+      padding: 20px;
+      display: inline-block;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
     }
-
-    input, button {
-      padding: 12px;
-      margin: 10px;
-      font-size: 16px;
+    input {
+      display: block;
+      margin: 10px auto;
+      padding: 10px;
       width: 80%;
-      max-width: 300px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
     }
-
     button {
-      background-color: #6c63ff;
+      padding: 10px 20px;
+      background-color: #333;
       color: white;
       border: none;
+      cursor: pointer;
+      border-radius: 5px;
     }
-
     button:hover {
-      background-color: #574b90;
-    }
-
-    #result {
-      margin-top: 30px;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 6px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      display: none;
+      background-color: #555;
     }
   </style>
 </head>
 <body>
-  <h2>Student Result Login</h2>
+  <h2>Student Login - Check Your Results</h2>
+  <form id="loginForm">
+    <input type="text" name="studentID" placeholder="Enter your ID (e.g. TEF2025-0001)" required />
+    <input type="password" name="pin" placeholder="Enter your PIN" required />
+    <button type="submit">Login</button>
+  </form>
 
-  <input type="text" id="studentId" placeholder="Enter Your Student ID" />
-  <input type="password" id="pin" placeholder="Enter Your PIN" />
-  <br />
-  <button onclick="checkResult()">Login</button>
-
-  <div id="result"></div>
+  <p id="response"></p>
 
   <script>
-    async function checkResult() {
-      const studentId = document.getElementById("studentId").value.trim();
-      const pin = document.getElementById("pin").value.trim();
-      const resultBox = document.getElementById("result");
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbz3-cZZM_Zl23gfNJFczdOHL_ywDz0Rxi38ao4O82GU1_edzNtQpJF3M5W4eAU_KR9s/exec';
 
-      if (!studentId || !pin) {
-        alert("Please enter both Student ID and PIN.");
-        return;
-      }
-
-      resultBox.style.display = "block";
-      resultBox.innerHTML = "Checking credentials...";
-
-      try {
-        const url = `https://script.google.com/macros/s/AKfycbxD4I6gTNaDa-HgtZQazLP2hZDOa-yEcyt0IBkJNJ008xMu6aDx3Gw0TuY-MgHv83qO/exec?studentId=${encodeURIComponent(studentId)}&pin=${encodeURIComponent(pin)}`;
-        
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (data.status === "success") {
-          resultBox.innerHTML = `
-            <h3>Welcome ${data.name}</h3>
-            <p><strong>ID:</strong> ${data.studentId}</p>
-            <p><strong>Result:</strong><br>${data.result}</p>
-          `;
+    document.getElementById('loginForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const form = new FormData(e.target);
+      fetch(scriptURL, {
+        method: 'POST',
+        body: form
+      })
+      .then(response => response.text())
+      .then(result => {
+        if (result.includes('Success')) {
+          document.getElementById('response').innerText = "Login successful! Redirecting...";
+          // Replace with your results page
+          setTimeout(() => {
+            window.location.href = `student_results.html?id=${form.get("studentID")}`;
+          }, 1500);
         } else {
-          resultBox.innerHTML = `<span style="color:red;">${data.message}</span>`;
+          document.getElementById('response').innerText = result;
         }
-      } catch (err) {
-        resultBox.innerHTML = `<span style="color:red;">Error connecting to server. Please try again.</span>`;
-      }
-    }
+      })
+      .catch(error => {
+        console.error('Error!', error.message);
+        document.getElementById('response').innerText = "Error connecting to server.";
+      });
+    });
   </script>
 </body>
 </html>
