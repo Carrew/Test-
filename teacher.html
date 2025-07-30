@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Teacher Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial; text-align: center; padding: 20px; }
+    input { margin: 8px; padding: 10px; width: 80%; max-width: 300px; }
+    button { padding: 10px 20px; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h2>Teacher Login</h2>
+  <input type="text" id="id" placeholder="Enter Teacher ID"><br>
+  <input type="password" id="pin" placeholder="Enter PIN"><br>
+  <button onclick="login()">Login</button>
+  <p class="error" id="error"></p>
+
+  <script>
+    function login() {
+      const id = document.getElementById('id').value;
+      const pin = document.getElementById('pin').value;
+      const url = "https://script.google.com/macros/s/AKfycbz3-cZZM_Zl23gfNJFczdOHL_ywDz0Rxi38ao4O82GU1_edzNtQpJF3M5W4eAU_KR9s/exec";
+
+      fetch(url, {
+        method: 'POST',
+        body: new URLSearchParams({
+          id: id,
+          pin: pin,
+          sheet: "Teachers"
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          localStorage.setItem("teacherID", id);
+          localStorage.setItem("teacherName", data.name);
+          window.location.href = "teacher_dashboard.html";
+        } else {
+          document.getElementById("error").textContent = data.message;
+        }
+      })
+      .catch(err => {
+        document.getElementById("error").textContent = "Network error.";
+      });
+    }
+  </script>
+</body>
+</html>
