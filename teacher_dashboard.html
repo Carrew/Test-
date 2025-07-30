@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Teacher Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial; padding: 20px; }
+  </style>
+</head>
+<body>
+  <h2>Welcome, <span id="teacherName"></span></h2>
+  <p>This is your dashboard. You can now enter grades, view submissions, etc.</p>
+
+  <script>
+    const name = localStorage.getItem("teacherName");
+    if (!name) {
+      window.location.href = "teacher.html";
+    } else {
+      document.getElementById("teacherName").textContent = name;
+    }
+  </script>
+</body>
+</html>
