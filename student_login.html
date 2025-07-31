@@ -3,42 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <title>Student Login – Tyneceploh Educational Foundation</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
-      padding: 30px;
-      text-align: center;
-    }
-    h2 {
-      color: #333;
-    }
-    input, button {
-      padding: 12px;
-      margin: 10px;
-      font-size: 16px;
-      width: 80%;
-      max-width: 300px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background-color: #6c63ff;
-      color: white;
-      border: none;
-    }
-    button:hover {
-      background-color: #574b90;
-    }
-    #result {
-      margin-top: 30px;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 6px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      display: none;
-    }
+    /* Keep your existing styles here */
   </style>
 </head>
 <body>
@@ -47,12 +14,12 @@
   <input type="text" id="studentId" placeholder="Enter Your Student ID" />
   <input type="password" id="pin" placeholder="Enter Your PIN" />
   <br />
-  <button onclick="checkLogin()">Login</button>
+  <button onclick="checkResult()">Login</button>
 
   <div id="result"></div>
 
   <script>
-    async function checkLogin() {
+    async function checkResult() {
       const studentId = document.getElementById("studentId").value.trim();
       const pin = document.getElementById("pin").value.trim();
       const resultBox = document.getElementById("result");
@@ -66,21 +33,22 @@
       resultBox.innerHTML = "Checking credentials...";
 
       try {
-        const url = `https://script.google.com/macros/s/AKfycbz3-cZZM_Zl23gfNJFczdOHL_ywDz0Rxi38ao4O82GU1_edzNtQpJF3M5W4eAU_KR9s/exec?studentID=${encodeURIComponent(studentId)}&pin=${encodeURIComponent(pin)}`;
+        const url = `https://script.google.com/macros/s/AKfycbxD4I6gTNaDa-HgtZQazLP2hZDOa-yEcyt0IBkJNJ008xMu6aDx3Gw0TuY-MgHv83qO/exec?studentID=${encodeURIComponent(studentId)}&pin=${encodeURIComponent(pin)}`;
         
         const response = await fetch(url);
-        const text = await response.text();
+        const data = await response.text();
 
-        if (text === "success") {
+        if (data === "success") {
           resultBox.innerHTML = '<span style="color:green;">Login successful! Redirecting...</span>';
           setTimeout(() => {
-            window.location.href = "student_results.html?studentID=" + encodeURIComponent(studentId);
+            // Redirect with studentID as URL param for results page
+            window.location.href = `student_results.html?studentID=${encodeURIComponent(studentId)}`;
           }, 1500);
         } else {
-          resultBox.innerHTML = '<span style="color:red;">Invalid ID or PIN.</span>';
+          resultBox.innerHTML = `<span style="color:red;">Invalid ID or PIN.</span>`;
         }
       } catch (err) {
-        resultBox.innerHTML = '<span style="color:red;">Error connecting to server. Please try again.</span>';
+        resultBox.innerHTML = `<span style="color:red;">Error connecting to server. Please try again.</span>`;
       }
     }
   </script>
