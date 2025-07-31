@@ -7,129 +7,96 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 30px;
-      background-color: #fafafa;
-      color: #333;
+      padding: 20px;
+      background-color: #f9f9f9;
     }
     h2 {
-      color: #2a2a72;
+      color: #333;
       text-align: center;
-    }
-    label, input, button {
-      display: block;
-      margin: 10px auto;
-      max-width: 300px;
-      width: 90%;
-      font-size: 16px;
-    }
-    input {
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background-color: #6c63ff;
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #574b90;
-    }
-    #message {
-      text-align: center;
-      margin-top: 20px;
-      font-weight: bold;
     }
     table {
       margin: 20px auto;
       border-collapse: collapse;
       width: 90%;
       max-width: 600px;
-      display: none;
+      background: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     th, td {
-      border: 1px solid #888;
-      padding: 10px;
-      text-align: center;
+      border: 1px solid #ccc;
+      padding: 12px 15px;
+      text-align: left;
     }
     th {
       background-color: #6c63ff;
       color: white;
     }
+    #message {
+      text-align: center;
+      color: red;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
-
-  <h2>Student Results</h2>
-
-  <label for="studentId">Enter Your Student ID:</label>
-  <input type="text" id="studentId" placeholder="e.g. TEF2025-0001" />
-
-  <button onclick="fetchResults()">Check Results</button>
-
+  <h2>Your Approved Results</h2>
   <div id="message"></div>
-
-  <table id="resultsTable">
+  <table id="resultsTable" style="display:none;">
     <thead>
       <tr>
         <th>Subject</th>
         <th>Score</th>
       </tr>
     </thead>
-    <tbody id="resultsBody"></tbody>
+    <tbody></tbody>
   </table>
 
   <script>
-    async function fetchResults() {
-      const studentId = document.getElementById("studentId").value.trim();
-      const messageDiv = document.getElementById("message");
-      const resultsTable = document.getElementById("resultsTable");
-      const resultsBody = document.getElementById("resultsBody");
+    // Get studentID from URL query string
+    const urlParams = new URLSearchParams(window.location.search);
+    const studentID = urlParams.get('studentID');
 
-      messageDiv.textContent = "";
-      resultsTable.style.display = "none";
-      resultsBody.innerHTML = "";
+    if (!studentID) {
+      document.getElementById('message').textContent = 'No student ID found in URL.';
+    } else {
+      fetchResults(studentID);
+    }
 
-      if (!studentId) {
-        messageDiv.textContent = "Please enter your Student ID.";
-        messageDiv.style.color = "red";
-        return;
-      }
-
-      messageDiv.textContent = "Loading results...";
-      messageDiv.style.color = "black";
-
+    async function fetchResults(id) {
       try {
-        const response = await fetch(`https://script.google.com/macros/s/AKfycbz3-cZZM_Zl23gfNJFczdOHL_ywDz0Rxi38ao4O82GU1_edzNtQpJF3M5W4eAU_KR9s/exec?getResultsFor=${encodeURIComponent(studentId)}`);
+        const url = `https://script.google.com/macros/s/AKfycbz3-cZZM_Zl23gfNJFczdOHL_ywDz0Rxi38ao4O82GU1_edzNtQpJF3M5W4eAU_KR9s/exec?getResultsFor=${encodeURIComponent(id)}`;
+        const response = await fetch(url);
         const data = await response.json();
 
         if (data.status === "success") {
-          const results = data.results;
-
-          if (results.length === 0) {
-            messageDiv.textContent = "No results available yet.";
-            return;
-          }
-
-          for (const item of results) {
-            const row = `<tr><td>${item.subject}</td><td>${item.score}</td></tr>`;
-            resultsBody.insertAdjacentHTML("beforeend", row);
-          }
-          resultsTable.style.display = "table";
-          messageDiv.textContent = "";
+          displayResults(data.results);
         } else {
-          messageDiv.textContent = "Results not found or not approved yet.";
-          messageDiv.style.color = "red";
+          document.getElementById('message').textContent = 'No results found or not approved yet.';
         }
       } catch (error) {
-        messageDiv.textContent = "Error fetching results. Please try again.";
-        messageDiv.style.color = "red";
+        document.getElementById('message').textContent = 'Error fetching results. Try again later.';
       }
     }
-  </script>
 
+    function displayResults(results) {
+      const tbody = document.querySelector('#resultsTable tbody');
+      tbody.innerHTML = ''; // Clear any previous data
+
+      results.forEach(item => {
+        const row = document.createElement('tr');
+        const subjectCell = document.createElement('td');
+        subjectCell.textContent = item.subject;
+        const scoreCell = document.createElement('td');
+        scoreCell.textContent = item.score;
+
+        row.appendChild(subjectCell);
+        row.appendChild(scoreCell);
+        tbody.appendChild(row);
+      });
+
+      document.getElementById('resultsTable').style.display = 'table';
+      document.getElementById('message').textContent = '';
+    }
+  </script>
 </body>
 </html>
