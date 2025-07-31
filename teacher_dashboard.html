@@ -1,23 +1,123 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Teacher Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>Student Dashboard – Tyneceploh Educational Foundation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial; padding: 20px; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    h2 {
+      color: #2c3e50;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 600px;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px 12px;
+      text-align: center;
+    }
+    th {
+      background-color: #6c63ff;
+      color: white;
+    }
+    #error {
+      color: red;
+      margin-top: 20px;
+    }
+    #loading {
+      font-style: italic;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
-  <h2>Welcome, <span id="teacherName"></span></h2>
-  <p>This is your dashboard. You can now enter grades, view submissions, etc.</p>
+
+  <h2>Student Dashboard</h2>
+
+  <label for="studentId">Enter Your Student ID:</label><br />
+  <input type="text" id="studentId" placeholder="e.g. TEF2025-0001" />
+  <button onclick="loadGrades()">View Approved Grades</button>
+
+  <div id="loading" style="display:none;">Loading...</div>
+  <div id="error"></div>
+
+  <table id="gradesTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>Period</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody id="gradesBody">
+      <!-- Grades will appear here -->
+    </tbody>
+  </table>
 
   <script>
-    const name = localStorage.getItem("teacherName");
-    if (!name) {
-      window.location.href = "teacher.html";
-    } else {
-      document.getElementById("teacherName").textContent = name;
+    async function loadGrades() {
+      const studentId = document.getElementById("studentId").value.trim();
+      const errorDiv = document.getElementById("error");
+      const loadingDiv = document.getElementById("loading");
+      const gradesTable = document.getElementById("gradesTable");
+      const gradesBody = document.getElementById("gradesBody");
+
+      errorDiv.textContent = "";
+      gradesTable.style.display = "none";
+      gradesBody.innerHTML = "";
+
+      if (!studentId) {
+        errorDiv.textContent = "Please enter your Student ID.";
+        return;
+      }
+
+      loadingDiv.style.display = "block";
+
+      try {
+        const url = `https://script.google.com/macros/s/AKfycbz3-cZZM_Zl23gfNJFczdOHL_ywDz0Rxi38ao4O82GU1_edzNtQpJF3M5W4eAU_KR9s/exec?studentId=${encodeURIComponent(studentId)}`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        loadingDiv.style.display = "none";
+
+        if (data.status === "success") {
+          const grades = data.data.grades;
+
+          // Clear any existing rows
+          gradesBody.innerHTML = "";
+
+          for (const period in grades) {
+            const score = grades[period] || "-";
+            const row = `<tr><td>${formatPeriodName(period)}</td><td>${score}</td></tr>`;
+            gradesBody.insertAdjacentHTML("beforeend", row);
+          }
+
+          gradesTable.style.display = "table";
+        } else {
+          errorDiv.textContent = data.message || "Grades not found.";
+        }
+      } catch (error) {
+        loadingDiv.style.display = "none";
+        errorDiv.textContent = "Error fetching grades. Please try again later.";
+      }
+    }
+
+    function formatPeriodName(key) {
+      // Format camelCase keys to readable text
+      return key
+        .replace(/([A-Z])/g, " $1")  // Insert space before capital letters
+        .replace(/^./, str => str.toUpperCase()); // Capitalize first letter
     }
   </script>
+
 </body>
 </html>
