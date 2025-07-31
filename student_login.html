@@ -5,7 +5,40 @@
   <title>Student Login – Tyneceploh Educational Foundation</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* Keep your existing styles here */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      padding: 30px;
+      text-align: center;
+    }
+    h2 {
+      color: #333;
+    }
+    input, button {
+      padding: 12px;
+      margin: 10px;
+      font-size: 16px;
+      width: 80%;
+      max-width: 300px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #6c63ff;
+      color: white;
+      border: none;
+    }
+    button:hover {
+      background-color: #574b90;
+    }
+    #result {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 6px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -33,7 +66,7 @@
       resultBox.innerHTML = "Checking credentials...";
 
       try {
-        const url = `https://script.google.com/macros/s/AKfycbxD4I6gTNaDa-HgtZQazLP2hZDOa-yEcyt0IBkJNJ008xMu6aDx3Gw0TuY-MgHv83qO/exec?studentID=${encodeURIComponent(studentId)}&pin=${encodeURIComponent(pin)}`;
+        const url = `https://script.google.com/macros/s/AKfycbxD4I6gTNaDa-HgtZQazLP2hZDOa-yEcyt0IBkJNJ008xMu6aDx3Gw0TuY-MgHv83qO/exec?id=${encodeURIComponent(studentId)}&pin=${encodeURIComponent(pin)}`;
         
         const response = await fetch(url);
         const data = await response.text();
@@ -41,8 +74,7 @@
         if (data === "success") {
           resultBox.innerHTML = '<span style="color:green;">Login successful! Redirecting...</span>';
           setTimeout(() => {
-            // Redirect with studentID as URL param for results page
-            window.location.href = `student_results.html?studentID=${encodeURIComponent(studentId)}`;
+            window.location.href = `student_results.html?id=${encodeURIComponent(studentId)}`;
           }, 1500);
         } else {
           resultBox.innerHTML = `<span style="color:red;">Invalid ID or PIN.</span>`;
