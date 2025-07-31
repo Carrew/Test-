@@ -7,30 +7,51 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-      text-align: center;
-    }
-    h2 {
+      padding: 30px;
+      background-color: #fafafa;
       color: #333;
     }
-    #results {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    h2 {
+      color: #2a2a72;
+      text-align: center;
+    }
+    label, input, button {
+      display: block;
+      margin: 10px auto;
+      max-width: 300px;
+      width: 90%;
+      font-size: 16px;
+    }
+    input {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #6c63ff;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #574b90;
+    }
+    #message {
+      text-align: center;
       margin-top: 20px;
-      text-align: left;
+      font-weight: bold;
     }
     table {
-      width: 100%;
+      margin: 20px auto;
       border-collapse: collapse;
-      margin-top: 15px;
+      width: 90%;
+      max-width: 600px;
+      display: none;
     }
     th, td {
-      border: 1px solid #ddd;
+      border: 1px solid #888;
       padding: 10px;
       text-align: center;
     }
@@ -38,50 +59,77 @@
       background-color: #6c63ff;
       color: white;
     }
-    #loading {
-      margin-top: 30px;
-      font-style: italic;
-      color: #666;
-    }
   </style>
 </head>
 <body>
-  <h2>Your Results</h2>
-  <div id="loading">Loading results, please wait...</div>
-  <div id="results" style="display:none;"></div>
+
+  <h2>Student Results</h2>
+
+  <label for="studentId">Enter Your Student ID:</label>
+  <input type="text" id="studentId" placeholder="e.g. TEF2025-0001" />
+
+  <button onclick="fetchResults()">Check Results</button>
+
+  <div id="message"></div>
+
+  <table id="resultsTable">
+    <thead>
+      <tr>
+        <th>Subject</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody id="resultsBody"></tbody>
+  </table>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const studentID = params.get('studentID');
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbz3-cZZM_Zl23gfNJFczdOHL_ywDz0Rxi38ao4O82GU1_edzNtQpJF3M5W4eAU_KR9s/exec';
+    async function fetchResults() {
+      const studentId = document.getElementById("studentId").value.trim();
+      const messageDiv = document.getElementById("message");
+      const resultsTable = document.getElementById("resultsTable");
+      const resultsBody = document.getElementById("resultsBody");
 
-    if (!studentID) {
-      document.getElementById('loading').innerText = "No student ID provided.";
-    } else {
-      fetch(`${scriptURL}?getResultsFor=${encodeURIComponent(studentID)}`)
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('loading').style.display = 'none';
+      messageDiv.textContent = "";
+      resultsTable.style.display = "none";
+      resultsBody.innerHTML = "";
 
-          if (data.status === "success") {
-            let resultsHTML = `<h3>Student ID: ${studentID}</h3><table><tr><th>Subject</th><th>Score</th></tr>`;
+      if (!studentId) {
+        messageDiv.textContent = "Please enter your Student ID.";
+        messageDiv.style.color = "red";
+        return;
+      }
 
-            data.results.forEach(item => {
-              resultsHTML += `<tr><td>${item.subject}</td><td>${item.score}</td></tr>`;
-            });
+      messageDiv.textContent = "Loading results...";
+      messageDiv.style.color = "black";
 
-            resultsHTML += "</table>";
-            document.getElementById('results').innerHTML = resultsHTML;
-            document.getElementById('results').style.display = 'block';
-          } else {
-            document.getElementById('loading').innerText = "Results not found or not approved yet.";
+      try {
+        const response = await fetch(`https://script.google.com/macros/s/AKfycbz3-cZZM_Zl23gfNJFczdOHL_ywDz0Rxi38ao4O82GU1_edzNtQpJF3M5W4eAU_KR9s/exec?getResultsFor=${encodeURIComponent(studentId)}`);
+        const data = await response.json();
+
+        if (data.status === "success") {
+          const results = data.results;
+
+          if (results.length === 0) {
+            messageDiv.textContent = "No results available yet.";
+            return;
           }
-        })
-        .catch(err => {
-          document.getElementById('loading').innerText = "Error fetching results.";
-          console.error(err);
-        });
+
+          for (const item of results) {
+            const row = `<tr><td>${item.subject}</td><td>${item.score}</td></tr>`;
+            resultsBody.insertAdjacentHTML("beforeend", row);
+          }
+          resultsTable.style.display = "table";
+          messageDiv.textContent = "";
+        } else {
+          messageDiv.textContent = "Results not found or not approved yet.";
+          messageDiv.style.color = "red";
+        }
+      } catch (error) {
+        messageDiv.textContent = "Error fetching results. Please try again.";
+        messageDiv.style.color = "red";
+      }
     }
   </script>
+
 </body>
 </html>
