@@ -1,43 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Teacher Login – Tyneceploh Educational Foundation</title>
-</head>
-<body>
-  <h2>Teacher Login</h2>
-  <form id="loginForm">
-    <input type="text" id="id" placeholder="Teacher ID" required><br>
-    <input type="password" id="pin" placeholder="PIN" required><br>
-    <button type="submit">Login</button>
-  </form>
-  <p id="errorMsg" style="color:red;"></p>
-
-  <script>
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const id = document.getElementById('id').value;
-      const pin = document.getElementById('pin').value;
-
-      fetch('https://script.google.com/macros/s/AKfycbz3-cZZM_Zl23gfNJFczdOHL_ywDz0Rxi38ao4O82GU1_edzNtQpJF3M5W4eAU_KR9s/exec', {
-        method: 'POST',
-        body: new URLSearchParams({
-          id: id,
-          pin: pin,
-          role: "teacher"
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          window.location.href = data.redirect;
-        } else {
-          document.getElementById('errorMsg').innerText = data.message;
-        }
-      })
-      .catch(() => {
-        document.getElementById('errorMsg').innerText = "Error connecting to server.";
-      });
-    });
-  </script>
-</body>
-</html>
+<form action="https://script.google.com/macros/s/AKfycbxD4I6gTNaDa-HgtZQazLP2hZDOa-yEcyt0IBkJNJ008xMu6aDx3Gw0TuY-MgHv83qO/exec" method="post">
+  <input type="hidden" name="role" value="student">
+  <label>Student ID: <input type="text" name="id" /></label><br>
+  <label>PIN: <input type="password" name="pin" /></label><br>
+  <button type="submit">Login</button>
+</form>
