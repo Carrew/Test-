@@ -1,48 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Tyneceploh Educational Foundation</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      text-align: center;
-      padding: 30px;
-    }
-    h1 {
-      color: #b03a2e;
-    }
-    .button {
-      display: block;
-      width: 80%;
-      max-width: 300px;
-      margin: 20px auto;
-      padding: 15px;
-      font-size: 18px;
-      background-color: #5c6bc0;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: background-color 0.3s;
-    }
-    .button:hover {
-      background-color: #3949ab;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Student Gallery</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+  h2 { color: #333; text-align: center; }
+  .gallery { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+  .gallery-item { width: 200px; text-align: center; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer; }
+  .gallery-item img { width: 100%; border-radius: 6px; }
+  .caption { margin-top: 6px; font-weight: 600; }
+  /* Modal */
+  .modal { display: none; position: fixed; z-index: 999; padding-top: 50px; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background: rgba(0,0,0,0.7); }
+  .modal-content { margin: auto; display: block; width: 80%; max-width: 700px; }
+  .close { position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; }
+  @media (max-width: 700px) { .modal-content { width: 90%; } }
+</style>
 </head>
 <body>
-  <h1>Tyneceploh Educational Foundation</h1>
 
-  <a href="student_login.html" class="button">🎓 Check Results</a>
-  <a href="teacher_login.html" class="button">👨‍🏫 Teacher Login</a>
-<a href="principal_login.html">
-  <button>Principal Login</button>
-</a>
-  <p style="margin-top: 40px; font-size: 14px; color: #888;">
-    Empowering minds from Nursery to 9th Grade
-  </p>
+<h2>Tyneceploh Gallery</h2>
+<div class="gallery" id="gallery"></div>
+
+<!-- Modal -->
+<div id="modal" class="modal">
+  <span class="close" id="modalClose">&times;</span>
+  <img class="modal-content" id="modalImg">
+  <div style="color:white;text-align:center;margin-top:5px;" id="modalCaption"></div>
+</div>
+
+<script>
+const GALLERY_API = 'https://script.google.com/macros/s/AKfycbw9P_XOd4k498l0e4WDbFqAF1asb2u4sRj_uX2B-2S1MvyWOeWQZqxy8dr13mPOdNOeuw/exec?action=viewGallery';
+
+async function loadGallery() {
+  const galleryDiv = document.getElementById('gallery');
+  galleryDiv.innerHTML = 'Loading...';
+
+  try {
+    const res = await fetch(GALLERY_API);
+    const data = await res.json();
+
+    if (!data.success || !data.gallery.length) {
+      galleryDiv.innerHTML = 'No images uploaded yet.';
+      return;
+    }
+
+    galleryDiv.innerHTML = '';
+    data.gallery.forEach(item => {
+      // Make sure Google Drive link is embeddable
+      let driveUrl = item.URL;
+      const match = driveUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (match) driveUrl = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+
+      const div = document.createElement('div');
+      div.className = 'gallery-item';
+      div.innerHTML = `
+        <img src="${driveUrl}" alt="${item.Caption}" />
+        <div class="caption">${item.Caption}</div>
+      `;
+
+      // Click to open modal
+      div.onclick = () => openModal(driveUrl, item.Caption);
+      galleryDiv.appendChild(div);
+    });
+
+  } catch (err) {
+    galleryDiv.innerHTML = 'Error loading gallery.';
+    console.error(err);
+  }
+}
+
+// Modal functions
+const modal = document.getElementById('modal');
+const modalImg = document.getElementById('modalImg');
+const modalCaption = document.getElementById('modalCaption');
+const modalClose = document.getElementById('modalClose');
+
+function openModal(url, caption) {
+  modal.style.display = 'block';
+  modalImg.src = url;
+  modalCaption.textContent = caption;
+}
+modalClose.onclick = () => modal.style.display = 'none';
+window.onclick = (e) => { if (e.target == modal) modal.style.display = 'none'; }
+
+// Load gallery on page load
+loadGallery();
+</script>
+
 </body>
 </html>
